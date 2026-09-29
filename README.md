@@ -6,7 +6,7 @@ An end-to-end machine learning and deep learning project to predict customer chu
 
 ## Project Status
 
-**In Progress** — **Phases 1, 2, 3, 4, and 5 completed** (Data Understanding, Exploratory Data Analysis, Preprocessing & Feature Engineering, Baseline Modeling, and Deep Learning ANN Modeling). Next up: Hyperparameter Tuning & Regularization / Model Diagnostics (Phase 6 & 7).
+**In Progress** — **Phases 1 through 5 completed** (Data Understanding, Exploratory Data Analysis, Preprocessing & Feature Engineering, Baseline Modeling, and Deep Learning ANN Modeling). **Phase 7 (Full Model Evaluation & Diagnostics)** is currently in progress.
 
 | Phase | Description | Status |
 |---|---|:---:|
@@ -15,8 +15,8 @@ An end-to-end machine learning and deep learning project to predict customer chu
 | **Phase 3** | Preprocessing, Feature Engineering & Splitting | Completed |
 | **Phase 4** | Baseline Model (Logistic Regression) | Completed |
 | **Phase 5** | Deep Learning Model (Keras/TensorFlow ANN) | Completed |
-| **Phase 6** | Hyperparameter Tuning & Regularization | Next |
-| **Phase 7** | Model Evaluation & Diagnostics | Planned |
+| **Phase 6** | Hyperparameter Tuning & Regularization | Planned |
+| **Phase 7** | Full Model Evaluation & Diagnostics | In Progress |
 | **Phase 8** | Model Comparison (Baseline vs. Neural Network) | Planned |
 | **Phase 9** | Model Interpretability (SHAP / Feature Importance) | Planned |
 | **Phase 10** | Interactive Streamlit Deployment | Planned |
@@ -173,6 +173,21 @@ Total Trainable Parameters: 1,889
 
 ---
 
+## Preliminary Model Comparison (Phases 4 & 5)
+
+| Metric / Attribute | Naive Baseline (Majority Class) | Logistic Regression Baseline | Initial Feedforward ANN (Keras) |
+|---|:---:|:---:|:---:|
+| **Trainable Parameters** | 0 | 42 | 1,889 |
+| **Validation Accuracy** | 73.46% | 79.75% | **79.85%** |
+| **Validation Loss** | — | — | **0.4195** (Epoch 5) |
+| **Class 1 (Churn) Recall** | 0.00 | **0.55** | *Evaluation in Progress* |
+| **Class 1 (Churn) Precision** | 0.00 | **0.64** | *Evaluation in Progress* |
+| **Class 1 (Churn) F1-Score** | 0.00 | **0.59** | *Evaluation in Progress* |
+| **Overfitting Strategy** | — | L2 regularization (C=1.0) | EarlyStopping (patience=5, restore_best_weights=True) |
+| **Saved Artifact** | — | [`models/logistic_regression_baseline.pkl`](models/logistic_regression_baseline.pkl) | [`models/neural_network.keras`](models/neural_network.keras) |
+
+---
+
 ## Project Structure
 
 ```
@@ -230,6 +245,7 @@ pip install -r requirements.txt
 3. **`notebooks/03_preprocessing.ipynb`** — Feature encoding, standard scaling, and stratified train/val/test splitting.
 4. **`notebooks/04_Baseline_model.ipynb`** — Train and evaluate the Logistic Regression benchmark model.
 5. **`notebooks/05_Deep_Learning_Model.ipynb`** — Build, compile, train, and save the Keras ANN with EarlyStopping.
+6. **`notebooks/07_Full_evaluation.ipynb`** — Model evaluation, confusion matrix, ROC-AUC, PR curves, and comprehensive diagnostics.
 
 ---
 
@@ -248,3 +264,4 @@ pip install -r requirements.txt
 ## Author
 
 **Ruchitha Vithana**
+
