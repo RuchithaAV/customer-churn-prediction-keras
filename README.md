@@ -6,16 +6,16 @@ An end-to-end machine learning and deep learning project to predict customer chu
 
 ## Project Status
 
-**In Progress** — **Phases 1, 2, and 3 completed** (Data Understanding, Exploratory Data Analysis, and Preprocessing & Feature Engineering). Next up: Baseline Modeling (Phase 4).
+**In Progress** — **Phases 1, 2, 3, 4, and 5 completed** (Data Understanding, Exploratory Data Analysis, Preprocessing & Feature Engineering, Baseline Modeling, and Deep Learning ANN Modeling). Next up: Hyperparameter Tuning & Regularization / Model Diagnostics (Phase 6 & 7).
 
 | Phase | Description | Status |
 |---|---|:---:|
 | **Phase 1** | Data Understanding & Data Cleaning | Completed |
 | **Phase 2** | Exploratory Data Analysis (EDA) | Completed |
 | **Phase 3** | Preprocessing, Feature Engineering & Splitting | Completed |
-| **Phase 4** | Baseline Model (Logistic Regression) | Next |
-| **Phase 5** | Deep Learning Model (Keras/TensorFlow ANN) | Planned |
-| **Phase 6** | Hyperparameter Tuning & Regularization | Planned |
+| **Phase 4** | Baseline Model (Logistic Regression) | Completed |
+| **Phase 5** | Deep Learning Model (Keras/TensorFlow ANN) | Completed |
+| **Phase 6** | Hyperparameter Tuning & Regularization | Next |
 | **Phase 7** | Model Evaluation & Diagnostics | Planned |
 | **Phase 8** | Model Comparison (Baseline vs. Neural Network) | Planned |
 | **Phase 9** | Model Interpretability (SHAP / Feature Importance) | Planned |
@@ -67,7 +67,7 @@ EDA conducted in [`02_eda.ipynb`](notebooks/02_eda.ipynb) revealed key drivers o
 1. **Target Class Imbalance:**
    - **Retained (0):** 73.46% (5,174 customers)
    - **Churned (1):** 26.54% (1,869 customers)
-   - *Implication:* Accuracy alone is an inadequate metric; evaluation will focus on ROC-AUC, PR-AUC, Precision, Recall, and F1-Score.
+   - *Implication:* Accuracy alone is an inadequate metric; evaluation focuses on ROC-AUC, PR-AUC, Precision, Recall, and F1-Score.
 
 2. **Customer Tenure:**
    - Churned customers have a median tenure of **10 months** compared to **38 months** for retained customers (correlation: **-0.352**).
@@ -106,13 +106,70 @@ Implemented in [`03_preprocessing.ipynb`](notebooks/03_preprocessing.ipynb):
 3. **High-Cardinality Handling (`City`):**
    - Retained the top 10 most frequent cities (`Los Angeles`, `San Diego`, `San Jose`, `Sacramento`, `San Francisco`, `Fresno`, `Long Beach`, `Oakland`, `Stockton`, `Glendale`) and grouped all remaining 1,119 cities into `'Other'`, followed by one-hot encoding (`drop_first=True`).
 4. **Stratified Train / Validation / Test Splitting:**
-   - **Train Set (70%):** 4,929 samples
-   - **Validation Set (15%):** 1,057 samples
-   - **Test Set (15%):** 1,057 samples
+   - **Train Set (70%):** 4,929 samples (`data/X_train.npy`, `data/y_train.npy`)
+   - **Validation Set (15%):** 1,057 samples (`data/X_val.npy`, `data/y_val.npy`)
+   - **Test Set (15%):** 1,057 samples (`data/X_test.npy`, `data/y_test.npy`)
    - Stratification on `Churn Value` ensures identical class proportions (~26.5% positive) across all three subsets.
 5. **Feature Scaling (Leakage Prevention):**
    - `StandardScaler` fitted **strictly on `X_train`** numerical features (`Tenure Months`, `Monthly Charges`, `Total Charges`, `CLTV`) and applied to transform `X_val` and `X_test`.
-6. **Final Feature Matrix:** 41 input features prepared for modeling.
+6. **Final Feature Matrix:** 41 input features prepared and tracked via [`data/feature_names.json`](data/feature_names.json).
+
+---
+
+## Baseline Modeling — Logistic Regression (Phase 4)
+
+Implemented in [`04_Baseline_model.ipynb`](notebooks/04_Baseline_model.ipynb):
+
+A linear baseline model was established to benchmark future deep learning architectures against a simple, interpretable statistical standard.
+
+- **Model:** `LogisticRegression(max_iter=1000, random_state=42)`
+- **Validation Results (1,057 validation samples):**
+  - **Overall Accuracy:** **79.75% (~80%)** (vs. 73.46% naive "always predict no churn" majority class baseline — a +6.29% improvement).
+  - **Class 0 (Retained):** Precision: `0.84`, Recall: `0.89`, F1-Score: `0.87` (Support: 776).
+  - **Class 1 (Churned):** Precision: `0.64`, Recall: `0.55`, F1-Score: `0.59` (Support: 281).
+  - **Macro Average:** Precision: `0.74`, Recall: `0.72`, F1-Score: `0.73`.
+  - **Weighted Average:** Precision: `0.79`, Recall: `0.80`, F1-Score: `0.79`.
+- **Key Takeaway:** The baseline captures 55% of actual churners (Recall = 0.55) with 64% precision. Capturing non-linear interactions through neural architectures will aim to boost minority-class recall and overall discriminative capacity.
+- **Saved Model Artifact:** [`models/logistic_regression_baseline.pkl`](models/logistic_regression_baseline.pkl)
+
+---
+
+## Deep Learning Model — Keras/TensorFlow ANN (Phase 5)
+
+Implemented in [`05_Deep_Learning_Model.ipynb`](notebooks/05_Deep_Learning_Model.ipynb):
+
+A multi-layer feedforward Artificial Neural Network (ANN) was constructed and trained using Keras/TensorFlow to model complex, non-linear relationships across demographic, service, and usage dimensions.
+
+### 1. Architecture Overview
+
+```
+Input (41 features)
+       │
+Dense Layer 1 (32 units, ReLU activation) ─── [1,344 params]
+       │
+Dense Layer 2 (16 units, ReLU activation) ─── [528 params]
+       │
+Output Layer (1 unit, Sigmoid activation) ─── [17 params]
+──────────────────────────────────────────────────────────
+Total Trainable Parameters: 1,889
+```
+
+### 2. Compilation & Training Configuration
+- **Optimizer:** `Adam`
+- **Loss Function:** `binary_crossentropy`
+- **Batch Size:** `32`
+- **Max Epochs:** `50`
+- **Overfitting Control:** `EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)`
+
+### 3. Training Dynamics & Early Stopping
+- `EarlyStopping` triggered at **Epoch 10**, successfully detecting validation loss plateau and early overfitting.
+- Best validation loss was achieved at **Epoch 5**:
+  - `val_loss`: **0.4195**
+  - `val_accuracy`: **79.85%**
+  - `train_loss`: **0.3948**
+  - `train_accuracy`: **80.67%**
+- Thanks to `restore_best_weights=True`, the model automatically rolled back to its optimal Epoch 5 weight configuration.
+- **Saved Model Artifact:** [`models/neural_network.keras`](models/neural_network.keras)
 
 ---
 
@@ -122,13 +179,22 @@ Implemented in [`03_preprocessing.ipynb`](notebooks/03_preprocessing.ipynb):
 customer-churn-prediction-keras/
 ├── data/
 │   ├── Telco_customer_churn.xlsx   # Raw IBM dataset
-│   └── telco_churn_clean.xlsx      # Cleaned dataset (post-Phase 1)
+│   ├── telco_churn_clean.xlsx      # Cleaned dataset (post-Phase 1)
+│   ├── X_train.npy / y_train.npy   # Preprocessed training set (70%, 4929 samples)
+│   ├── X_val.npy / y_val.npy       # Preprocessed validation set (15%, 1057 samples)
+│   ├── X_test.npy / y_test.npy     # Preprocessed test set (15%, 1057 samples)
+│   └── feature_names.json          # 41 engineered feature column names
 ├── notebooks/
 │   ├── 01_understanding _the_dataset.ipynb  # Phase 1: Data audit, column decisions & cleaning
 │   ├── 02_eda.ipynb                         # Phase 2: Exploratory data analysis & statistical insights
-│   └── 03_preprocessing.ipynb               # Phase 3: Encoding, scaling & stratified splitting
+│   ├── 03_preprocessing.ipynb               # Phase 3: Encoding, scaling & stratified splitting
+│   ├── 04_Baseline_model.ipynb              # Phase 4: Logistic Regression baseline model
+│   ├── 05_Deep_Learning_Model.ipynb         # Phase 5: Keras/TensorFlow ANN architecture & training
+│   └── 07_Full_evaluation.ipynb             # Phase 7: Model evaluation & diagnostics (in progress)
 ├── src/                            # Modular Python modules (data, pipeline, train, eval)
-├── models/                         # Saved trained models (.keras, .pkl scalers/encoders)
+├── models/                         # Saved trained models (.keras, .pkl models/scalers)
+│   ├── logistic_regression_baseline.pkl     # Trained Logistic Regression model
+│   └── neural_network.keras                 # Trained Keras ANN model
 ├── app/                            # Streamlit web application
 ├── requirements.txt                # Project dependencies
 ├── README.md                       # Project documentation
@@ -159,9 +225,11 @@ pip install -r requirements.txt
 
 ### 2. Run Notebooks Sequentially
 
-1. **`notebooks/01_understanding _the_dataset.ipynb`** — Data inspection and initial cleaning.
-2. **`notebooks/02_eda.ipynb`** — Exploratory data analysis and visualizations.
-3. **`notebooks/03_preprocessing.ipynb`** — Feature engineering, encoding, scaling, and train/val/test splits.
+1. **`notebooks/01_understanding _the_dataset.ipynb`** — Data inspection, column categorization, and cleaning.
+2. **`notebooks/02_eda.ipynb`** — Exploratory data analysis and visualization of churn drivers.
+3. **`notebooks/03_preprocessing.ipynb`** — Feature encoding, standard scaling, and stratified train/val/test splitting.
+4. **`notebooks/04_Baseline_model.ipynb`** — Train and evaluate the Logistic Regression benchmark model.
+5. **`notebooks/05_Deep_Learning_Model.ipynb`** — Build, compile, train, and save the Keras ANN with EarlyStopping.
 
 ---
 
@@ -170,7 +238,7 @@ pip install -r requirements.txt
 - **Language:** Python 3.11+
 - **Data Manipulation:** `pandas`, `numpy`, `openpyxl`
 - **Visualization:** `matplotlib`, `seaborn`
-- **Machine Learning & Preprocessing:** `scikit-learn`
+- **Machine Learning & Preprocessing:** `scikit-learn`, `joblib`
 - **Deep Learning:** `tensorflow`, `keras`
 - **Explainability:** `shap`
 - **Deployment:** `streamlit`
@@ -180,5 +248,3 @@ pip install -r requirements.txt
 ## Author
 
 **Ruchitha Vithana**
-
-
