@@ -18,7 +18,7 @@ An end-to-end machine learning and deep learning project to predict customer chu
 | **Phase 6** | Hyperparameter Tuning & Regularization | Completed |
 | **Phase 7** | Full Model Evaluation & Diagnostics | Completed |
 | **Phase 8** | Model Comparison (Baseline vs. Neural Networks) | Completed |
-| **Phase 9** | Model Interpretability (SHAP / Feature Importance) | Planned |
+| **Phase 9** | Model Interpretability (SHAP / Feature Importance) | Completed |
 | **Phase 10** | Interactive Streamlit Deployment | Planned |
 
 ---
