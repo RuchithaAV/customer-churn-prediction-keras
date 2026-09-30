@@ -117,7 +117,7 @@ Implemented in [`03_preprocessing.ipynb`](notebooks/03_preprocessing.ipynb):
 
 ---
 
-## Baseline Modeling — Logistic Regression (Phase 4)
+## Baseline Modeling - Logistic Regression (Phase 4)
 
 Implemented in [`04_Baseline_model.ipynb`](notebooks/04_Baseline_model.ipynb):
 
@@ -136,7 +136,7 @@ A linear baseline model was established to benchmark future deep learning archit
 
 ---
 
-## Deep Learning Model — Initial Keras/TensorFlow ANN (Phase 5)
+## Deep Learning Model - Initial Keras/TensorFlow ANN (Phase 5)
 
 Implemented in [`05_Deep_Learning_Model.ipynb`](notebooks/05_Deep_Learning_Model.ipynb):
 
