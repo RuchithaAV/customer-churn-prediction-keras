@@ -6,7 +6,7 @@ An end-to-end machine learning and deep learning project to predict customer chu
 
 ## Project Status
 
-**In Progress** — **Phases 1 through 7 completed** (Data Understanding, Exploratory Data Analysis, Preprocessing & Feature Engineering, Baseline Modeling, Deep Learning ANN Modeling, Hyperparameter Tuning & Regularization, and Full Model Evaluation & Diagnostics). **Phase 8 (Model Comparison)** is currently in progress.
+**In Progress** — **Phases 1 through 8 completed** (Data Understanding, Exploratory Data Analysis, Preprocessing & Feature Engineering, Baseline Modeling, Deep Learning ANN Modeling, Hyperparameter Tuning & Regularization, Full Model Evaluation & Diagnostics, and Model Comparison). **Phase 9 (Model Interpretability with SHAP)** is next.
 
 | Phase | Description | Status |
 |---|---|:---:|
@@ -17,7 +17,7 @@ An end-to-end machine learning and deep learning project to predict customer chu
 | **Phase 5** | Deep Learning Model (Keras/TensorFlow ANN) | Completed |
 | **Phase 6** | Hyperparameter Tuning & Regularization | Completed |
 | **Phase 7** | Full Model Evaluation & Diagnostics | Completed |
-| **Phase 8** | Model Comparison (Baseline vs. Neural Network) | In Progress |
+| **Phase 8** | Model Comparison (Baseline vs. Neural Networks) | Completed |
 | **Phase 9** | Model Interpretability (SHAP / Feature Importance) | Planned |
 | **Phase 10** | Interactive Streamlit Deployment | Planned |
 
@@ -216,7 +216,7 @@ Comprehensive evaluation and diagnostic analysis were performed on the 1,057 val
 
 ---
 
-## Model Comparison & Benchmark Summary
+## Model Comparison & Benchmark Summary (Phase 8)
 
 Comprehensive performance comparison across all tested configurations on the validation set (1,057 samples):
 
@@ -252,7 +252,7 @@ customer-churn-prediction-keras/
 │   ├── 05_Deep_Learning_Model.ipynb       # Phase 5: Initial Keras ANN architecture & training
 │   ├── 06_hyperparameter_tuning.ipynb     # Phase 6: L2 regularization, Dropout, & threshold tuning
 │   ├── 07_Full_evaluation.ipynb           # Phase 7: Model evaluation, confusion matrix & diagnostics
-│   └── 08_Model_comparison.ipynb          # Phase 8: Comprehensive model benchmarking (in progress)
+│   └── 08_Model_comparison.ipynb          # Phase 8: Comprehensive model benchmarking
 ├── src/                                  # Modular Python source code
 ├── models/                               # Saved model artifacts
 │   ├── logistic_regression_baseline.pkl   # Trained Logistic Regression model
