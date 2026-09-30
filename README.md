@@ -1,12 +1,12 @@
 # Customer Churn Prediction (Keras/TensorFlow)
 
-An end-to-end machine learning and deep learning project to predict customer churn for a telecommunications provider using an Artificial Neural Network (ANN) built with Keras/TensorFlow, benchmarked against a Logistic Regression baseline model, regularized with Dropout & L2 penalties, evaluated via comprehensive diagnostics & threshold tuning, and explained via SHAP interpretability.
+An end-to-end machine learning and deep learning project to predict customer churn for a telecommunications provider using an Artificial Neural Network (ANN) built with Keras/TensorFlow, benchmarked against a Logistic Regression baseline model, regularized with Dropout & L2 penalties, evaluated via comprehensive diagnostics & threshold tuning, explained via SHAP interpretability, and deployed as an interactive Streamlit web application.
 
 ---
 
 ## Project Status
 
-**In Progress** — **Phases 1 through 8 completed** (Data Understanding, Exploratory Data Analysis, Preprocessing & Feature Engineering, Baseline Modeling, Deep Learning ANN Modeling, Hyperparameter Tuning & Regularization, Full Model Evaluation & Diagnostics, and Model Comparison). **Phase 9 (Model Interpretability with SHAP)** is next.
+**Completed** — **All 10 Phases completed** (Data Understanding, Exploratory Data Analysis, Preprocessing & Feature Engineering, Baseline Modeling, Deep Learning ANN Modeling, Hyperparameter Tuning & Regularization, Full Model Evaluation & Diagnostics, Model Comparison, Model Interpretability with SHAP, and Interactive Streamlit Deployment).
 
 | Phase | Description | Status |
 |---|---|:---:|
@@ -19,7 +19,7 @@ An end-to-end machine learning and deep learning project to predict customer chu
 | **Phase 7** | Full Model Evaluation & Diagnostics | Completed |
 | **Phase 8** | Model Comparison (Baseline vs. Neural Networks) | Completed |
 | **Phase 9** | Model Interpretability (SHAP / Feature Importance) | Completed |
-| **Phase 10** | Interactive Streamlit Deployment | Planned |
+| **Phase 10** | Interactive Streamlit Deployment | Completed |
 
 ---
 
@@ -32,7 +32,7 @@ This project develops an end-to-end predictive pipeline to:
 2. Compare a traditional linear baseline (Logistic Regression) against deep neural architectures (Keras/TensorFlow).
 3. Mitigate overfitting using L2 regularization and Dropout, optimizing decision thresholds to align with business retention economics.
 4. Provide model transparency and explainability using SHAP values to uncover key churn drivers for business decision-makers.
-5. Deploy an interactive Streamlit web application for real-time customer churn probability scoring.
+5. Deploy an interactive Streamlit web application for real-time customer churn probability scoring and retention decision support.
 
 ---
 
@@ -112,7 +112,7 @@ Implemented in [`03_preprocessing.ipynb`](notebooks/03_preprocessing.ipynb):
    - **Test Set (15%):** 1,057 samples (`data/X_test.npy`, `data/y_test.npy`)
    - Stratification on `Churn Value` ensures identical class proportions (~26.5% positive) across all three subsets.
 5. **Feature Scaling (Leakage Prevention):**
-   - `StandardScaler` fitted **strictly on `X_train`** numerical features (`Tenure Months`, `Monthly Charges`, `Total Charges`, `CLTV`) and applied to transform `X_val` and `X_test`.
+   - `StandardScaler` fitted **strictly on `X_train`** numerical features (`Tenure Months`, `Monthly Charges`, `Total Charges`, `CLTV`) and saved to [`models/scaler.pkl`](models/scaler.pkl).
 6. **Final Feature Matrix:** 41 input features prepared and tracked via [`data/feature_names.json`](data/feature_names.json).
 
 ---
@@ -233,6 +233,41 @@ Comprehensive performance comparison across all tested configurations on the val
 
 ---
 
+## Model Interpretability with SHAP (Phase 9)
+
+Implemented in [`09_Model_interpretability.ipynb`](notebooks/09_Model_interpretability.ipynb):
+
+To make the deep learning model transparent for business stakeholders and customer retention teams, SHAP (SHapley Additive exPlanations) was applied to compute feature contributions:
+
+1. **Top Global Churn Drivers:**
+   - **`Tenure Months`:** Strongest protective factor against churn; long-tenure customers have significantly lower churn probability.
+   - **`Contract_Two year` & `Contract_One year`:** Multi-year contracts strongly decrease churn probability.
+   - **`Internet Service_Fiber optic`:** Substantially increases churn probability (corroborating high monthly charges and support pain points).
+   - **`Dependents` & `Partner`:** Customers with families exhibit higher retention rates.
+   - **`Payment Method_Electronic check`:** Positively associated with churn risk compared to automated payment methods.
+
+2. **Local Customer Explanations:**
+   - Enables individualized waterfall and bar charts showing the exact dollar and service factors driving each specific customer's churn risk.
+
+---
+
+## Interactive Streamlit Deployment (Phase 10)
+
+Implemented in [`app/app.py`](app/app.py), [`src/preprocessing.py`](src/preprocessing.py), and [`src/inference.py`](src/inference.py):
+
+An interactive web application built with Streamlit providing real-time churn prediction, risk tiering, and explainability:
+
+### Key App Features
+- **Strict Preprocessing Pipeline Alignment:** Replicates the exact training transformations (binary mappings, city bucketing, 41-column reindexing with zero-fill, and standard scaling via `models/scaler.pkl`).
+- **1-Click Customer Presets:** Pre-loaded archetypes (*🔴 High Risk Churner*, *🟢 Low Risk Loyal Customer*, *🟡 Borderline Customer*) for instant testing.
+- **Custom Customer Form:** Tabbed inputs covering Demographics, Services/Add-ons, and Contract/Financial details.
+- **Real-Time Risk Dashboard:** Displays churn probability (%), risk badge (*Low*, *Moderate*, *High*, *Critical*), and threshold comparison.
+- **Baseline Model Benchmark:** Side-by-side comparison against the Logistic Regression baseline model.
+- **Local SHAP Explanation Chart:** Real-time horizontal bar plot highlighting features that increase churn risk (red) vs. features promoting retention (green).
+- **41-Dimensional Vector Inspector:** Expandable table showing the exact encoded and scaled features passed to Keras.
+
+---
+
 ## Project Structure
 
 ```
@@ -252,16 +287,21 @@ customer-churn-prediction-keras/
 │   ├── 05_Deep_Learning_Model.ipynb       # Phase 5: Initial Keras ANN architecture & training
 │   ├── 06_hyperparameter_tuning.ipynb     # Phase 6: L2 regularization, Dropout, & threshold tuning
 │   ├── 07_Full_evaluation.ipynb           # Phase 7: Model evaluation, confusion matrix & diagnostics
-│   └── 08_Model_comparison.ipynb          # Phase 8: Comprehensive model benchmarking
+│   ├── 08_Model_comparison.ipynb          # Phase 8: Comprehensive model benchmarking
+│   └── 09_Model_interpretability.ipynb    # Phase 9: Model explainability with SHAP
 ├── src/                                  # Modular Python source code
+│   ├── preprocessing.py                  # Preprocessing pipeline and preset profiles
+│   └── inference.py                      # Model loading, inference, risk tiering & SHAP
 ├── models/                               # Saved model artifacts
 │   ├── logistic_regression_baseline.pkl   # Trained Logistic Regression model
 │   ├── neural_network.keras               # Initial trained Keras ANN model (v1)
 │   ├── neural_network_v2.keras            # Regularized Keras ANN model (v2)
+│   ├── scaler.pkl                         # Fitted StandardScaler for numerical columns
 │   └── final_threshold.txt                # Selected optimal classification threshold (0.35)
 ├── app/                                  # Streamlit web application
+│   └── app.py                            # Streamlit dashboard implementation
 ├── requirements.txt                      # Project dependencies
-├── README.md                             # Project documentation
+├── README.md                             # Complete project documentation
 └── .gitignore                            # Git ignore rules
 ```
 
@@ -287,7 +327,15 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Run Notebooks Sequentially
+### 2. Launch the Streamlit Web Application
+
+```bash
+streamlit run app/app.py
+```
+
+Open [http://localhost:8501](http://localhost:8501) in your browser.
+
+### 3. Run Notebooks Sequentially (Optional)
 
 1. **`notebooks/01_understanding _the_dataset.ipynb`** — Data inspection, column categorization, and cleaning.
 2. **`notebooks/02_eda.ipynb`** — Exploratory data analysis and visualization of churn drivers.
@@ -297,6 +345,7 @@ pip install -r requirements.txt
 6. **`notebooks/06_hyperparameter_tuning.ipynb`** — Regularize ANN with Dropout + L2 and perform threshold tuning.
 7. **`notebooks/07_Full_evaluation.ipynb`** — Detailed evaluation diagnostics, ROC curves, confusion matrices, and trade-off analysis.
 8. **`notebooks/08_Model_comparison.ipynb`** — Side-by-side performance benchmarking and test set evaluation.
+9. **`notebooks/09_Model_interpretability.ipynb`** — Compute SHAP values and feature importance summaries.
 
 ---
 
@@ -314,6 +363,5 @@ pip install -r requirements.txt
 
 ## Author
 
-**Ruchitha Vithana**
-
-
+**Ruchitha Vithana**  
+- **GitHub:** [@RuchithaAV](https://github.com/RuchithaAV)
