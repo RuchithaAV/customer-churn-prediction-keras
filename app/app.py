@@ -147,7 +147,7 @@ try:
         shap_background,
     ) = get_model_and_artifacts()
 except Exception as e:
-    st.error(f"⚠️ Error loading model artifacts: {e}")
+    st.error(f" Error loading model artifacts: {e}")
     st.stop()
 
 
@@ -155,7 +155,7 @@ except Exception as e:
 st.markdown(
     f"""
     <div class="hero-container">
-        <div class="hero-title">⚡ Customer Churn Prediction Engine</div>
+        <div class="hero-title"> Customer Churn Prediction Engine</div>
         <div class="hero-subtitle">
             Trained on Telco Customer Churn using a <b>Keras Deep Neural Network</b> (Sequential Dense 32 &rarr; 16 &rarr; 1).<br>
             Optimized with a <b>Decision Threshold of {decision_threshold:.2f}</b> to prioritize churn recall over precision.
@@ -168,7 +168,7 @@ st.markdown(
 
 # Sidebar Configuration & Preset Selection
 with st.sidebar:
-    st.markdown("### 🎛️ Input Controls & Presets")
+    st.markdown("### Input Controls & Presets")
 
     presets = get_sample_customer_presets()
     selected_preset = st.selectbox(
@@ -183,7 +183,7 @@ with st.sidebar:
         preset_data = presets[selected_preset]
 
     st.markdown("---")
-    st.markdown("### ⚙️ Model Parameters")
+    st.markdown("###  Model Parameters")
     custom_threshold = st.slider(
         "Decision Threshold:",
         min_value=0.10,
@@ -198,18 +198,18 @@ with st.sidebar:
     show_vector = st.checkbox("Inspect 41-dim Feature Vector", value=False)
 
     st.markdown("---")
-    st.caption("📦 **Artifact Details:**")
+    st.caption(" **Artifact Details:**")
     st.caption(f"• Model: `{os.path.basename(model_path)}`")
     st.caption("• Features: 41 One-Hot Encoded Columns")
     st.caption("• Scaler: StandardScaler (Fitted)")
 
 
 # Main Input Form
-st.markdown("### 📋 Enter Customer Profile")
+st.markdown("###  Enter Customer Profile")
 
 with st.form("churn_prediction_form"):
     tab1, tab2, tab3 = st.tabs(
-        ["👤 Demographics & Location", "📞 Services & Add-ons", "💳 Contract & Financials"]
+        [" Demographics & Location", " Services & Add-ons", " Contract & Financials"]
     )
 
     with tab1:
@@ -417,11 +417,11 @@ try:
         baseline_model=baseline_model if show_baseline else None,
     )
 except Exception as e:
-    st.error(f"❌ Preprocessing / Inference Error: {e}")
+    st.error(f" Preprocessing / Inference Error: {e}")
     st.stop()
 
 st.markdown("---")
-st.markdown("## 📊 Prediction Results & Risk Assessment")
+st.markdown("##  Prediction Results & Risk Assessment")
 
 # Display Result Cards
 res_col1, res_col2, res_col3 = st.columns([1.2, 1, 1])
@@ -503,7 +503,7 @@ with res_col3:
 
 # SHAP Feature Contribution Chart
 if show_shap:
-    st.markdown("### 🔍 Key Churn Drivers (SHAP Local Explanation)")
+    st.markdown("###  Key Churn Drivers (SHAP Local Explanation)")
     with st.spinner("Calculating SHAP feature attribution..."):
         try:
             shap_df = compute_shap_contributions(
