@@ -6,7 +6,7 @@ An end-to-end machine learning and deep learning project to predict customer chu
 
 ## Project Status
 
-**Completed** — **All 10 Phases completed** (Data Understanding, Exploratory Data Analysis, Preprocessing & Feature Engineering, Baseline Modeling, Deep Learning ANN Modeling, Hyperparameter Tuning & Regularization, Full Model Evaluation & Diagnostics, Model Comparison, Model Interpretability with SHAP, and Interactive Streamlit Deployment).
+**Completed** - **All 10 Phases completed** (Data Understanding, Exploratory Data Analysis, Preprocessing & Feature Engineering, Baseline Modeling, Deep Learning ANN Modeling, Hyperparameter Tuning & Regularization, Full Model Evaluation & Diagnostics, Model Comparison, Model Interpretability with SHAP, and Interactive Streamlit Deployment).
 
 | Phase | Description | Status |
 |---|---|:---:|
