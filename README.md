@@ -190,11 +190,11 @@ Total Trainable Parameters: 1,889
 
 ### 2. Regularization Impact
 - Adding **L2 weight regularization (0.001)** and **Dropout (0.3)** significantly altered learning dynamics: validation loss continued to improve stably through **Epoch 31** (compared to Epoch 10 in v1).
-- Overfitting was effectively mitigated, allowing deeper gradient optimization and boosting discriminative performance (ROC-AUC: `0.8441` → `0.8469`).
+- Overfitting was effectively mitigated, allowing deeper gradient optimization and boosting discriminative performance (ROC-AUC: `0.8441` → `0.8469` on validation).
 
 ### 3. Decision Threshold Optimization
 - In customer retention, the business cost of a **False Negative** (losing a churned customer and their entire CLTV) far outweighs that of a **False Positive** (a proactive discount or outreach call to a retained customer).
-- Tuning the classification threshold from the default `0.50` to **`0.35`** boosted Churn Recall from **0.56 to 0.70**, ensuring **70% of churners** are proactively captured.
+- Tuning the classification threshold from the default `0.50` to **`0.35`** boosted Churn Recall from **0.56 to 0.70** on validation, ensuring more churners are proactively captured.
 - **Saved Artifacts:**
   - Regularized Model: [`models/neural_network_v2.keras`](models/neural_network_v2.keras)
   - Optimal Threshold: [`models/final_threshold.txt`](models/final_threshold.txt) (`0.35`)
@@ -210,7 +210,7 @@ Comprehensive evaluation and diagnostic analysis were performed on the 1,057 val
 1. **Confusion Matrix Analysis:**
    - Evaluated true positives, false positives, true negatives, and false negatives across models and thresholds.
 2. **ROC Curve & AUC Score:**
-   - Both Logistic Regression (`0.8435`) and the Neural Networks (`0.8441` for v1, `0.8469` for v2) show strong discriminative capability.
+   - Both Logistic Regression (`0.8435`) and the Neural Networks (`0.8441` for v1, `0.8469` for v2) show strong and comparable discriminative capability on validation data.
 3. **Threshold Sensitivity & Trade-offs:**
    - Shifting threshold from 0.50 to 0.35 creates an intentional, business-justified trade-off: Churn Recall increases significantly (53% → 69-70%) with a manageable trade-off in precision (65% → 55-58%).
 
@@ -218,7 +218,9 @@ Comprehensive evaluation and diagnostic analysis were performed on the 1,057 val
 
 ## Model Comparison & Benchmark Summary (Phase 8)
 
-Comprehensive performance comparison across all tested configurations on the validation set (1,057 samples):
+### Validation-Set Tuning Comparison
+
+All configurations below were compared on the **validation set** (1,057 samples) during model selection and threshold tuning:
 
 | Model Configuration | Decision Threshold | Accuracy | Churn Precision | Churn Recall | Churn F1-Score | ROC-AUC | Overfitting Control | Artifact File |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
@@ -229,7 +231,25 @@ Comprehensive performance comparison across all tested configurations on the val
 | **Regularized ANN (Model v2)** | 0.50 | 80.89% | **0.67** | 0.56 | 0.61 | **0.8469** | L2 (0.001) + Dropout (0.3) | [`models/neural_network_v2.keras`](models/neural_network_v2.keras) |
 | **Regularized ANN (Model v2) ⭐** | **0.35** | **77.39%** | **0.55** | **0.70** | **0.62** | **0.8469** | **L2 (0.001) + Dropout (0.3)** | **[`models/neural_network_v2.keras`](models/neural_network_v2.keras)** |
 
-> ⭐ **Selected Final Configuration:** `Regularized ANN (Model v2) @ 0.35 Threshold` — achieves the highest churn recall (**0.70**) and highest ROC-AUC (**0.8469**), directly maximizing customer retention potential.
+> ⭐ Based on validation performance, `Regularized ANN (Model v2) @ 0.35 Threshold` was selected as the final configuration, prioritizing churn recall in line with the project's retention-focused business objective.
+
+### Final Test-Set Evaluation
+
+The selected models were evaluated **once, on the held-out test set** (1,057 samples never used during training, validation, or threshold tuning) to produce an honest final scorecard:
+
+| Metric | Logistic Regression | Neural Network v2 @ 0.35 |
+|---|:---:|:---:|
+| Accuracy | **0.80** | 0.78 |
+| Churn Precision | **0.64** | 0.57 |
+| Churn Recall | 0.59 | **0.72** |
+| Churn F1 | 0.61 | **0.64** |
+| ROC-AUC | 0.8552 | 0.8529 |
+
+**Interpretation:** On the test set, both models achieve nearly identical ROC-AUC (0.8552 vs. 0.8529), confirming the validation-set finding that the two models have essentially the same raw discriminative power — the relationships in this dataset (tenure, contract type, internet service, payment method) are largely linear, and the neural network's added complexity did not unlock significant additional non-linear signal.
+
+Where the models diverge meaningfully is in the recall/precision trade-off produced by the neural network's tuned decision threshold. On unseen test data, the neural network catches **72% of actual churners**, compared to Logistic Regression's 59% — a substantial, confirmed improvement in the metric most aligned with the project's business priority. This comes at an accepted cost: precision drops from 0.64 to 0.57, meaning a higher proportion of flagged customers will not actually churn.
+
+**Conclusion:** Both models have comparable underlying discriminative ability. The neural network's real advantage comes not from its architecture alone, but from threshold tuning enabled by inspecting its calibrated probability outputs. Given the project's stated priority of minimizing missed churners over minimizing false alarms, **the Regularized Neural Network @ 0.35 threshold is the final selected model** for deployment.
 
 ---
 
@@ -240,14 +260,14 @@ Implemented in [`09_Model_interpretability.ipynb`](notebooks/09_Model_interpreta
 To make the deep learning model transparent for business stakeholders and customer retention teams, SHAP (SHapley Additive exPlanations) was applied to compute feature contributions:
 
 1. **Top Global Churn Drivers:**
-   - **`Tenure Months`:** Strongest protective factor against churn; long-tenure customers have significantly lower churn probability.
-   - **`Contract_Two year` & `Contract_One year`:** Multi-year contracts strongly decrease churn probability.
-   - **`Internet Service_Fiber optic`:** Substantially increases churn probability (corroborating high monthly charges and support pain points).
-   - **`Dependents` & `Partner`:** Customers with families exhibit higher retention rates.
+   - **`Tenure Months`:** Strongest factor overall; long-tenure customers have significantly lower predicted churn probability, low-tenure customers significantly higher.
+   - **`Contract_Two year` & `Contract_One year`:** Multi-year contracts strongly decrease predicted churn probability, consistent with the 15x churn-rate gap found in EDA.
+   - **`Internet Service_Fiber optic`:** Substantially increases predicted churn probability (corroborating higher monthly charges and the elevated fiber churn rate found in EDA).
+   - **`Dependents`, `Tech Support_Yes`, `Online Security_Yes`:** Ranked more prominently than their univariate EDA crosstabs suggested — having dependents or bundled support/security services measurably reduces predicted churn risk, suggesting customers with more "embedded" relationships with the company are stickier.
    - **`Payment Method_Electronic check`:** Positively associated with churn risk compared to automated payment methods.
 
 2. **Local Customer Explanations:**
-   - Enables individualized waterfall and bar charts showing the exact dollar and service factors driving each specific customer's churn risk.
+   - Individual waterfall plots show the exact features driving each specific customer's churn risk (e.g. a sampled low-risk customer's prediction was driven overwhelmingly by high tenure and a two-year contract), reinforcing that the model's local reasoning is consistent with its global feature importance — evidence it learned coherent, explainable patterns rather than fitting to noise.
 
 ---
 
@@ -287,7 +307,7 @@ customer-churn-prediction-keras/
 │   ├── 05_Deep_Learning_Model.ipynb       # Phase 5: Initial Keras ANN architecture & training
 │   ├── 06_hyperparameter_tuning.ipynb     # Phase 6: L2 regularization, Dropout, & threshold tuning
 │   ├── 07_Full_evaluation.ipynb           # Phase 7: Model evaluation, confusion matrix & diagnostics
-│   ├── 08_Model_comparison.ipynb          # Phase 8: Comprehensive model benchmarking
+│   ├── 08_Model_comparison.ipynb          # Phase 8: Comprehensive model benchmarking (validation + test)
 │   └── 09_Model_interpretability.ipynb    # Phase 9: Model explainability with SHAP
 ├── src/                                  # Modular Python source code
 │   ├── preprocessing.py                  # Preprocessing pipeline and preset profiles
@@ -295,7 +315,7 @@ customer-churn-prediction-keras/
 ├── models/                               # Saved model artifacts
 │   ├── logistic_regression_baseline.pkl   # Trained Logistic Regression model
 │   ├── neural_network.keras               # Initial trained Keras ANN model (v1)
-│   ├── neural_network_v2.keras            # Regularized Keras ANN model (v2)
+│   ├── neural_network_v2.keras            # Regularized Keras ANN model (v2, final)
 │   ├── scaler.pkl                         # Fitted StandardScaler for numerical columns
 │   └── final_threshold.txt                # Selected optimal classification threshold (0.35)
 ├── app/                                  # Streamlit web application
@@ -344,7 +364,7 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 5. **`notebooks/05_Deep_Learning_Model.ipynb`** — Build, compile, train, and save the initial Keras ANN.
 6. **`notebooks/06_hyperparameter_tuning.ipynb`** — Regularize ANN with Dropout + L2 and perform threshold tuning.
 7. **`notebooks/07_Full_evaluation.ipynb`** — Detailed evaluation diagnostics, ROC curves, confusion matrices, and trade-off analysis.
-8. **`notebooks/08_Model_comparison.ipynb`** — Side-by-side performance benchmarking and test set evaluation.
+8. **`notebooks/08_Model_comparison.ipynb`** — Side-by-side performance benchmarking on validation and final test-set evaluation.
 9. **`notebooks/09_Model_interpretability.ipynb`** — Compute SHAP values and feature importance summaries.
 
 ---
@@ -358,6 +378,24 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 - **Deep Learning:** `tensorflow`, `keras`
 - **Explainability:** `shap`
 - **Deployment:** `streamlit`
+
+---
+
+## Limitations
+
+- Dataset is a single-provider, static snapshot (7,043 customers) — model performance and feature importance may not generalize to other telecom providers, regions, or to customer behavior that shifts over time.
+- `City` was simplified to the top 10 most frequent cities plus an "Other" bucket due to high cardinality (1,129 unique values); this discards potentially useful location-specific signal for the majority of customers outside the top 10 cities.
+- The 0.35 decision threshold was chosen based on a general business assumption (that missed churners cost more than false alarms) rather than actual retention-campaign cost data — a real deployment should revisit this threshold using true cost figures.
+- The neural network and Logistic Regression achieved near-identical ROC-AUC on both validation and test sets, suggesting this dataset may not contain enough non-linear structure to fully showcase deep learning's advantages over a simpler, more interpretable model.
+- Evaluation reflects a single train/validation/test split; results were not cross-validated, so reported metrics carry some sampling variance.
+
+## Future Improvements
+
+- Incorporate actual retention-campaign cost/benefit data to set a cost-optimal decision threshold rather than one based on general assumptions.
+- Experiment with additional models (e.g. XGBoost/LightGBM) as a second baseline, since gradient-boosted trees often perform strongly on tabular data of this kind.
+- Test alternative `City` encoding strategies (e.g. target/frequency encoding) to recover signal currently discarded by the top-10-bucket approach.
+- Validate the Logistic Regression baseline with k-fold cross-validation for a more robust performance estimate.
+- Add model monitoring/retraining logic to the Streamlit app to handle data drift if deployed against live, evolving customer data over time.
 
 ---
 
